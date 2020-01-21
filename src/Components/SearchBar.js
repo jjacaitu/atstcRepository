@@ -28,7 +28,7 @@ function SearchBar(props) {
                         }
                     }}
                     renderItem={(item, isHighlighted) =>
-                        <div style={{ background: isHighlighted ? 'lightblue' : '#0176B4' }}>
+                        <div key={item} style={{ background: isHighlighted ? 'lightblue' : '#0176B4' }}>
                             {item}
                         </div>
                     }

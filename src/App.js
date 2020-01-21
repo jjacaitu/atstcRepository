@@ -206,6 +206,8 @@ function App() {
 
   
     
+  // Return what will be rendered
+  
   return (
     <div className="App">
       <header className="bar">
