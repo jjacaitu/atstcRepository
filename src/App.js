@@ -25,14 +25,19 @@ function App() {
   const [inputText, setInputText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [categoryToQuery, setCategoryToQuery] = useState(0);
+  const [selectedCarBrand, setSelectedCarBrand] = useState("Chevrolet");
 
 
-  // Use useEffect to create graphs only when data is updated or when user decies to look at the data graphs
+  // Use useEffect to create graphs only when data is updated or when user decies to look at the data graphs.
+
   React.useEffect(() => {
     if (display === "Graphs") {
-      createGraph(fullInfo);
+      if (window.chart !== undefined) {
+        window.chart.destroy();
+      }
+      createGraph(fullInfo, selectedCarBrand);
     }
-  },[display,fullInfo])
+  },[display,fullInfo,selectedCarBrand])
 
   // Create a function to get top 5 results of different categories
 
@@ -139,7 +144,12 @@ function App() {
     const information = [...displayInfo]
     const isIncreasing = LastHeaderButtonPressedIndex === buttonIndex ? !SortingIsIncreasing : true;
 
+
+
     information.sort(function (a, b) {
+
+      // If the category being sorted by is the index then treat the data as numbers and sort them
+
       if (buttonIndex === "0") {
         if (isIncreasing) {
 
@@ -149,6 +159,9 @@ function App() {
         }
         
       }
+
+      //  If the category being sorted by is the dates then treat the data as dates and sort them
+
       else if (buttonIndex === "1") {
         if ((new Date(a[buttonIndex])) > (new Date(b[buttonIndex]))){
           if (isIncreasing) {
@@ -165,6 +178,8 @@ function App() {
             return 1
           }
         } 
+
+        // Else sort them normally
       }else {
         if (a[buttonIndex] > b[buttonIndex]) {
           if (isIncreasing) {
@@ -207,7 +222,7 @@ function App() {
   
     
   // Return what will be rendered
-  
+
   return (
     <div className="App">
       <header className="bar">
@@ -218,15 +233,20 @@ function App() {
           <CSVReader
             id="fileReader"
             onFileLoaded={({ data }) => {
+
+              // When the file loads get the suggestions that will populate the autocomplete
               
               const suggestions = getSuggestions(0, data.slice(1));
               
+              // Set the states
+
               setFullInfo(data.slice(1));
               setDisplayInfo(data.slice(1));
               setFilteredInfo(data.slice(1, 11))
               setHeader(data[0]);
               setCurrentPage(1);
               setSuggestions(suggestions);
+              setDisplay("Table")
         
             }}
             style={{ display: 'block' }}
@@ -234,8 +254,12 @@ function App() {
           />
         </div>
 
+        
+        {/* If there is information uploaded then show the search bar to filter the information */}
+
         {fullInfo.length
           ?
+
           <SearchBar
             header={header}
             filter={filter}
@@ -253,6 +277,7 @@ function App() {
 
       <main>
 
+        {/* If there is information uploaded then show the options of seeing table or graphs to the user */}
         {
           displayInfo.length
             ?
@@ -264,17 +289,21 @@ function App() {
                 setDisplay("Graphs");
                 
                 
-              }}>Top Results</button>
+              }}>Graphs and Top Results</button>
             </div>
             :
             ""
             }
         {
+          // If the user selected table then show the table if not show the graphs and top results
+
           display === "Table"
             ?
             <div className="tableDiv">
               
-              <TableComponent sort={sort} header={header} info={filteredInfo} buttonIndex={LastHeaderButtonPressedIndex} ascending={SortingIsIncreasing}/>
+              <TableComponent sort={sort} header={header} info={filteredInfo} buttonIndex={LastHeaderButtonPressedIndex} ascending={SortingIsIncreasing} />
+              
+              {/* Button to go to the previous 10 results of the table */}
               
               <div className="pageControlDiv">
                 {currentPage !== 1 ?
@@ -288,6 +317,7 @@ function App() {
 
               }
 
+                {/* Button to go to the next 10 results of the table */}
                 {
                   currentPage !== Math.ceil(displayInfo.length / 10) && displayInfo.length ?
                 <button onClick={() => {
@@ -304,30 +334,60 @@ function App() {
               </div>
             </div>
             :
-            <div className="dataSummary">
-              <div className="topResultsSection">
-                <h2>TOP 5 RESULTS</h2>
-                <div className="topResultsMain">
-                  <TopResults categoryName={header[11]} labels={getTopFive(11).labels} dataArray={getTopFive(11).data} totalLength={fullInfo.length} />
-                  
-                  <TopResults categoryName={header[12]} labels={getTopFive(12).labels} dataArray={getTopFive(12).data} totalLength={fullInfo.length} />
+            <div className="dataSummaryMain">
+              
+              <div className="dataSummaryPieCharts">
+                <div className="topResultsSection">
+                  <h2>TOP 5 RESULTS</h2>
+                  <div className="topResultsMain">
 
-                  <TopResults categoryName={header[10]} labels={getTopFive(10).labels} dataArray={getTopFive(10).data} totalLength={fullInfo.length} />
+                    {/* Show top results of 4 different categories */}
+                    <TopResults categoryName={header[11]} labels={getTopFive(11).labels} dataArray={getTopFive(11).data} totalLength={fullInfo.length} />
+                    
+                    <TopResults categoryName={header[12]} labels={getTopFive(12).labels} dataArray={getTopFive(12).data} totalLength={fullInfo.length} />
 
-                  <TopResults categoryName={header[13]} labels={getTopFive(13).labels} dataArray={getTopFive(13).data} totalLength={fullInfo.length}/>
+                    <TopResults categoryName={header[10]} labels={getTopFive(10).labels} dataArray={getTopFive(10).data} totalLength={fullInfo.length} />
+
+                    <TopResults categoryName={header[13]} labels={getTopFive(13).labels} dataArray={getTopFive(13).data} totalLength={fullInfo.length}/>
+
+                  </div>
+                </div>
+              
+                <div className="chartsDiv">
+                  <canvas id="genderChart" width="200" height="200"></canvas>
+                  <canvas id="ageChart" width="200" height="200"></canvas>
 
                 </div>
               </div>
-              
+              <label htmlFor="brandSelect">Select a car brand:</label>
+              {/* A select that lets the user change the brand of the car, re-rendering the byBrandChart */}
+
+              <select onChange={(e) => {
+                
+                setSelectedCarBrand(e.target.value);
+                
+              }} name="" id="brandSelect">
+
+                {/* Populate the options with all the car brands sorted alphabetically */}
+
+                {getSuggestions(11, fullInfo).sort().map((brand, index) => {
+                  return <option key={index} value={brand}>{brand}</option>
+                })}
+              </select>
               <div className="chartsDiv">
-                <canvas id="genderChart" width="200" height="200"></canvas>
-                <canvas id="ageChart" width="200" height="200"></canvas>
+
+                <canvas id="byBrandChart" width="200" height="200"></canvas>
               </div>
             </div>
-
+        
+        
         }
       </main>
+      <footer>
+        <p>Made by Juan Acaiturri-Villa © 2020</p>
+      </footer>
     </div>
+  
   );
   
 }

@@ -1,29 +1,30 @@
 import React from "react";
 import Autocomplete from "react-autocomplete"
 
-function SearchBar(props) {
+function SearchBar({changeSelection, header, disabled, suggestions, inputText, onChangeFunction, onSelectFunction, filter, clearQueries }) {
     return (
         <form action="" onSubmit={(e) => {
             e.preventDefault();
             
         }}>
             <h3>Filter data by:</h3>
-            <select name="" id="" disabled={props.disabled} required onChange={(e)=>{props.changeSelection(e)}}>
-                {props.header.map((categories, index) => <option key={index} value={index}>{categories.split("_").join(" ")}</option>)}
+            <select name="" id="" disabled={disabled} required onChange={(e)=>{changeSelection(e)}}>
+                {header.map((categories, index) => <option key={index} value={index}>{categories.split("_").join(" ")}</option>)}
             </select>
-            {props.disabled
+            {disabled
                 ?
                 <input type="text" disabled />
                 :
                 <Autocomplete
                     
-                    disabled={props.disabled}
+                    disabled={disabled}
                     getItemValue={(item) => item}
-                    items={props.suggestions
+                    items={suggestions
                     }
                     shouldItemRender={item => {
-    
-                        if (item.toLowerCase().includes(props.inputText.toLowerCase()) && !props.disabled) {
+                        // Only render results that match with the text on the text input. Use to lowercase so that the query is not case sensitive
+                        
+                        if (item.toLowerCase().includes(inputText.toLowerCase()) && !disabled) {
                             return true
                         }
                     }}
@@ -32,14 +33,14 @@ function SearchBar(props) {
                             {item}
                         </div>
                     }
-                    value={props.inputText}
-                    onChange={props.onChangeFunction}
-                    onSelect={props.onSelectFunction}
+                    value={inputText}
+                    onChange={onChangeFunction}
+                    onSelect={onSelectFunction}
                 />
 
             }
-            <button disabled={props.disabled} type="submit" onClick={props.filter}>Filter</button>
-            <button disabled={props.disabled} onClick={props.clearQueries}>Clear</button>
+            <button disabled={disabled} type="submit" onClick={filter}>Filter</button>
+            <button disabled={disabled} onClick={clearQueries}>Clear</button>
 
         </form>
     )

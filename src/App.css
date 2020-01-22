@@ -26,6 +26,19 @@ body {
   font-family: 'Raleway', sans-serif;
 }
 
+header {
+  min-height: 40vh;
+}
+
+main {
+  min-height: 50vh;
+}
+footer {
+  background-color: rgb(6, 30, 51);
+  width: 100%;
+  margin-top: 50px;
+}
+
 ul {
   display: flex;
   list-style: none;
@@ -99,6 +112,7 @@ input[type=file] {
 
 select {
   margin-right: 10px;
+  margin-bottom: 10px;
 }
 
 .options {
@@ -190,7 +204,7 @@ td {
 /* Top results Style */
 
 
-.dataSummary {
+.dataSummaryPieCharts {
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -223,6 +237,7 @@ canvas {
   margin-bottom: 20px;
   border: solid 3px black;
   padding: 10px;
+  max-height: 700px;
 }
 
 .topDisplay {
